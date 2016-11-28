@@ -6,6 +6,7 @@ function Suggest(container, callback) {
         states: [
             {
                 id: 'blur',
+                onEntry: onBlurEntry,
                 transitions: [
                     {
                         target: 'focus',
@@ -83,6 +84,9 @@ function Suggest(container, callback) {
     input.onfocus = function() {
         sc.gen('select');
     };
+    input.onblur = function() {
+        sc.gen('unselect');
+    };
     input.addEventListener('input', function(e) {
         if(e.target.value === '') {
             sc.gen('clear');
@@ -129,5 +133,10 @@ function Suggest(container, callback) {
         });
         suggestField.innerHTML = '';
         suggestField.appendChild(list);
+    }
+
+    function onBlurEntry() {
+        suggestField.innerHTML = '';
+        suggestField.style.display = 'none';
     }
 }
