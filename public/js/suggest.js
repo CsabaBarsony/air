@@ -2,15 +2,16 @@
 //globals: scion
 
 function Suggest(container, callback) {
-    var model = {
+    var suggestions = [];
+    var chart = {
         states: [
             {
                 id: 'blur',
                 onEntry: onBlurEntry,
                 transitions: [
                     {
-                        target: 'focus',
-                        event: 'select'
+                        event: 'select',
+                        target: 'focus'
                     }
                 ]
             },
@@ -18,8 +19,8 @@ function Suggest(container, callback) {
                 id: 'focus',
                 transitions: [
                     {
-                        target: 'blur',
-                        event: 'unselect'
+                        event: 'unselect',
+                        target: 'blur'
                     }
                 ],
                 states: [
@@ -27,8 +28,8 @@ function Suggest(container, callback) {
                         id: 'hidden',
                         transitions: [
                             {
-                                target: 'loading',
-                                event: 'type'
+                                event: 'type',
+                                target: 'loading'
                             }
                         ]
                     },
@@ -43,12 +44,16 @@ function Suggest(container, callback) {
                                 onExit: onLoadingExit,
                                 transitions: [
                                     {
-                                        target: 'suggesting',
-                                        event: 'load'
+                                        event: 'load',
+                                        target: 'typing'
                                     },
                                     {
-                                        target: 'hidden',
-                                        event: 'clear'
+                                        event: 'clear',
+                                        target: 'hidden'
+                                    },
+                                    {
+                                        event: 'type',
+                                        target: 'loading'
                                     }
                                 ]
                             },
@@ -57,12 +62,37 @@ function Suggest(container, callback) {
                                 onEntry: onSuggestingEntry,
                                 transitions: [
                                     {
-                                        target: 'loading',
-                                        event: 'type'
+                                        event: 'type',
+                                        target: 'loading'
                                     },
                                     {
-                                        target: 'hidden',
-                                        event: 'clear'
+                                        event: 'clear',
+                                        target: 'hidden'
+                                    }
+                                ],
+                                states: [
+                                    {
+                                        id: 'typing',
+                                        transitions: [
+                                            {
+                                                event: 'excite',
+                                                target: 'excited'
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        id: 'excited',
+                                        onEntry: onExcitedEntry,
+                                        transitions: [
+                                            {
+                                                event: 'excite',
+                                                target: 'excited'
+                                            },
+                                            {
+                                                event: 'bore',
+                                                target: 'typing'
+                                            }
+                                        ]
                                     }
                                 ]
                             }
@@ -72,7 +102,7 @@ function Suggest(container, callback) {
             }
         ]
     };
-    var sc = new scion.Statechart(model, { logStatesEnteredAndExited: true });
+    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: true });
     sc.start();
 
     var suggestContainer = document.createElement('div');
@@ -93,6 +123,14 @@ function Suggest(container, callback) {
         }
         else {
             sc.gen('type');
+        }
+    });
+    input.addEventListener('keydown', function(e) {
+        if(e.key === 'ArrowDown') {
+            sc.gen('excite', 'down');
+        }
+        else if(e.key === 'ArrowUp') {
+            sc.gen('excite', 'up');
         }
     });
     suggestContainer.appendChild(input);
@@ -125,18 +163,71 @@ function Suggest(container, callback) {
     }
 
     function onSuggestingEntry(e) {
+        suggestions = e.data.map(function(d) {
+            return {
+                text: d,
+                selected: false
+            };
+        });
         var list = document.createElement('ul');
-        e.data.forEach((s) => {
+        suggestions.forEach((s) => {
             var listElement = document.createElement('li');
-            listElement.innerHTML = s;
+            listElement.innerHTML = s.text;
             list.appendChild(listElement);
         });
         suggestField.innerHTML = '';
         suggestField.appendChild(list);
     }
 
+    function onExcitedEntry(e) {
+        console.log(e);
+    }
+
     function onBlurEntry() {
         suggestField.innerHTML = '';
         suggestField.style.display = 'none';
     }
+
+    return {
+        name: 'I am a Suggest instance'
+    };
 }
+
+/**
+ * @param {Array} suggestions Array of suggestions
+ * @param {string} direction 'up' or 'down'
+ * @returns {Array} Array of suggestions
+ */
+Suggest.selectSuggestion = function(suggestions, direction) {
+    if(!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Suggestions parameter should be an array containing at least one element.');
+    if(!(direction === 'up' || direction === 'down')) throw new Error('Direction parameter should be \'up\' or \'down\'.');
+    var selected, selectedIndex, first, last, count = 0;
+    suggestions.forEach((s, i) => {
+        if(s.selected) {
+            count++;
+            selected = s;
+            selectedIndex = i;
+            if(i === 0) first = true;
+            else if(i === suggestions.length - 1) last = true;
+        }
+    });
+    if(count > 1) throw new Error('more than one suggestion is selected');
+    if(!selected) {
+        if(direction === 'up') {
+            suggestions[2].selected = true;
+        }
+        else {
+            suggestions[0].selected = true;
+        }
+    }
+    else {
+        selected.selected = false;
+        if(direction === 'up' && !first) {
+            suggestions[selectedIndex - 1].selected = true;
+        }
+        else if(direction === 'down' && !last) {
+            suggestions[selectedIndex + 1].selected = true;
+        }
+    }
+    return suggestions;
+};
