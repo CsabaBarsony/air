@@ -1,6 +1,6 @@
 describe('Suggest', function() {
     describe('selectSuggestion', function() {
-        var suggestions;
+        var suggestions, expected;
 
         beforeEach(function() {
             suggestions = [
@@ -17,46 +17,81 @@ describe('Suggest', function() {
                     selected: false
                 }
             ];
+
+            expected = [
+                {
+                    text: 'first',
+                    selected: false
+                },
+                {
+                    text: 'second',
+                    selected: false
+                },
+                {
+                    text: 'third',
+                    selected: false
+                }
+            ];
         });
 
-        it('should select the first suggestion on direction \'down\' when none is selected', function() {
-            var result = Suggest.selectSuggestion(suggestions, 'down');
-            expect(result[0]).toEqual({ text: 'first', selected: true });
+        describe('on direction \'up\' should', function() {
+            it('select the last suggestion when none is selected', function() {
+                expected[2].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'up');
+                expect(result[2]).toEqual({ text: 'third', selected: true });
+            });
+
+            it('select the previous suggestion and deselect the actual', function() {
+                suggestions[2].selected = true;
+                expected[1].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'up');
+                expect(result).toEqual(expected);
+            });
+
+            it('deselect the first suggestion when the first is selected', function() {
+                suggestions[0].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'up');
+                expect(result).toEqual(expected);
+            });
         });
 
-        it('should select the last suggestion on direction \'up\' when none is selected', function() {
-            var result = Suggest.selectSuggestion(suggestions, 'up');
-            expect(result[2]).toEqual({ text: 'third', selected: true });
+        describe('on direction \'down\' should', function() {
+            it('select the first suggestion when none is selected', function() {
+                expected[0].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'down');
+                expect(result).toEqual(expected);
+            });
+
+            it('select the next suggestion and deselect the actual', function() {
+                suggestions[0].selected = true;
+                expected[1].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'down');
+                expect(result).toEqual(expected);
+            });
+
+            it('deselect the last suggestion when the last is selected', function() {
+                suggestions[2].selected = true;
+                var result = Suggest.selectSuggestion(suggestions, 'down');
+                expect(result).toEqual(expected);
+            });
         });
 
-        it('should select the next suggestion on direction \'down\' and deselect the actual', function() {
-            suggestions[0].selected = true;
-            var result = Suggest.selectSuggestion(suggestions, 'down');
-            expect(result[0]).toEqual({ text: 'first', selected: false });
-            expect(result[1]).toEqual({ text: 'second', selected: true });
-        });
+        describe('should throw Error when', function() {
+            it('suggestions parameter is not array or is empty array', function() {
+                var errorMessage = 'Suggestions parameter should be an array containing at least one element.';
+                expect(function() { Suggest.selectSuggestion([], 'up'); }).toThrow(new Error(errorMessage));
+                expect(function() { Suggest.selectSuggestion('I am an array - no, I am joking.', 'up'); }).toThrow(new Error(errorMessage));
+            });
 
-        it('should select the previous suggestion on direction \'up\' and deselect the actual', function() {
-            suggestions[2].selected = true;
-            var result = Suggest.selectSuggestion(suggestions, 'up');
-            expect(result[2]).toEqual({ text: 'third', selected: false });
-            expect(result[1]).toEqual({ text: 'second', selected: true });
-        });
+            it('direction is different than \'up\' or \'down\'', function() {
+                expect(function() { Suggest.selectSuggestion(suggestions, 'left'); }).toThrow(new Error('Direction parameter should be \'up\' or \'down\'.'));
+            });
 
-        it('should throw Error when suggestions parameter is not array or empty array', function() {
-            var errorMessage = 'Suggestions parameter should be an array containing at least one element.';
-            expect(function() { Suggest.selectSuggestion([], 'up'); }).toThrow(new Error(errorMessage));
-            expect(function() { Suggest.selectSuggestion('I am an array - no, I am joking.', 'up'); }).toThrow(new Error(errorMessage));
-        });
-
-        it('should throw Error when direction is different than \'up\' or \'down\'', function() {
-            expect(function() { Suggest.selectSuggestion(suggestions, 'left'); }).toThrow(new Error('Direction parameter should be \'up\' or \'down\'.'));
-        });
-
-        it('should throw Error when suggestions contain more selected', function() {
-            suggestions[0].selected = true;
-            suggestions[1].selected = true;
-            expect(function() { Suggest.selectSuggestion(suggestions, 'up'); }).toThrow(new Error('more than one suggestion is selected'));
+            it('suggestions contain more selected', function() {
+                suggestions[0].selected = true;
+                suggestions[1].selected = true;
+                expect(function() { Suggest.selectSuggestion(suggestions, 'up'); }).toThrow(new Error('more than one suggestion is selected'));
+            });
         });
     });
 });
