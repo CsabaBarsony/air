@@ -68,6 +68,10 @@ function Suggest(container, callback) {
                                     {
                                         event: 'clear',
                                         target: 'hidden'
+                                    },
+                                    {
+                                        event: 'choose',
+                                        target: 'chosen'
                                     }
                                 ],
                                 states: [
@@ -97,6 +101,16 @@ function Suggest(container, callback) {
                                 ]
                             }
                         ]
+                    },
+                    {
+                        id: 'chosen',
+                        onEntry: onChosenEntry,
+                        transitions: [
+                            {
+                                event: 'type',
+                                target: 'loading'
+                            }
+                        ]
                     }
                 ]
             }
@@ -106,6 +120,13 @@ function Suggest(container, callback) {
     sc.start();
 
     var suggestContainer = document.createElement('div');
+    suggestContainer.addEventListener('keydown', function(e) {
+        var selected;
+        suggestions.forEach((s) => {
+            if(s.selected) selected = s.text;
+        });
+        if(e.key === 'Enter') sc.gen('choose', selected);
+    });
     suggestContainer.className += 'suggest';
     container.appendChild(suggestContainer);
 
@@ -180,12 +201,27 @@ function Suggest(container, callback) {
     }
 
     function onExcitedEntry(e) {
-        console.log(e);
+        var newSuggestions = Suggest.selectSuggestion(suggestions, e.data);
+        var list = document.createElement('ul');
+        newSuggestions.forEach((s) => {
+            var listElement = document.createElement('li');
+            listElement.innerHTML = s.text;
+            if(s.selected) listElement.className += 'selected';
+            list.appendChild(listElement);
+        });
+        suggestField.innerHTML = '';
+        suggestField.appendChild(list);
     }
 
     function onBlurEntry() {
         suggestField.innerHTML = '';
         suggestField.style.display = 'none';
+    }
+
+    function onChosenEntry(e) {
+        console.log(e.data);
+        input.value = e.data;
+        suggestField.innerHTML = '';
     }
 
     return {
