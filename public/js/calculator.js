@@ -1,4 +1,8 @@
-var foods = [
+'use strict';
+// globals: PubSub
+
+const FOOD_SELECT = 'FOOD_SELECT';
+const foods = [
     "asparagus",
     "apples",
     "avocado",
@@ -138,7 +142,14 @@ function onType(text, callback) {
 }
 
 function onSelect(foodName) {
-
+    PubSub.publish(FOOD_SELECT, foodName);
 }
 
-var foodSuggest = new Suggest(document.getElementById('suggest-container'), onType, onSelect);
+function foodSelected(message, data) {
+    console.log(message);
+    console.log(data);
+}
+
+var foodSelectSubscription = PubSub.subscribe(FOOD_SELECT, foodSelected);
+
+Suggest(document.getElementById('suggest-container'), onType, onSelect);
