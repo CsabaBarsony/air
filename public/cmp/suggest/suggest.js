@@ -1,7 +1,10 @@
 'use strict';
 //globals: scion
 
-function Suggest(container, callback) {
+function Suggest(container, onType, onSelect, options) {
+    if(!options) options = {
+        logStatesEnteredAndExited: false
+    };
     var suggestions = [];
     var chart = {
         states: [
@@ -116,7 +119,7 @@ function Suggest(container, callback) {
             }
         ]
     };
-    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: true });
+    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: options.logStatesEnteredAndExited });
     sc.start();
 
     var suggestContainer = document.createElement('div');
@@ -174,8 +177,9 @@ function Suggest(container, callback) {
     function onLoadingEntry() {
         pendingLoadings++;
         suggestField.innerHTML = 'loading...';
-        callback(input.value, function(suggestions) {
+        onType(input.value, function(suggestions) {
             pendingLoadings--;
+            // TODO: right sequence of callbacks is not guaranteed
             if(pendingLoadings === 0) {
                 sc.gen('load', suggestions);
             }
@@ -222,7 +226,7 @@ function Suggest(container, callback) {
     }
 
     function onChosenEntry(e) {
-        console.log(e.data);
+        onSelect(e.data);
         input.value = e.data;
         suggestField.innerHTML = '';
     }

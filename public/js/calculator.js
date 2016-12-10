@@ -126,7 +126,7 @@ var foods = [
     "Zucchini"
 ];
 
-var foodSuggest = new Suggest(document.getElementById('suggest-container'), function(text, callback) {
+function onType(text, callback) {
     var regex = new RegExp('^' + text, 'gi');
     var results = [];
     foods.forEach((food) => {
@@ -135,4 +135,10 @@ var foodSuggest = new Suggest(document.getElementById('suggest-container'), func
     setTimeout(function() {
         callback(results);
     }, 300);
-});
+}
+
+function onSelect(foodName) {
+
+}
+
+var foodSuggest = new Suggest(document.getElementById('suggest-container'), onType, onSelect);
