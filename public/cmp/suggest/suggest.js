@@ -169,13 +169,16 @@ function Suggest(container, callback) {
         suggestField.style.display = 'none';
     }
 
+    var pendingLoadings = 0;
+
     function onLoadingEntry() {
+        pendingLoadings++;
         suggestField.innerHTML = 'loading...';
-        var p = new Promise(function(resolve) {
-            callback('a', resolve);
-        });
-        p.then(function(suggestions) {
-            sc.gen('load', suggestions);
+        callback(input.value, function(suggestions) {
+            pendingLoadings--;
+            if(pendingLoadings === 0) {
+                sc.gen('load', suggestions);
+            }
         });
     }
 
@@ -250,7 +253,7 @@ Suggest.selectSuggestion = function(suggestions, direction) {
     if(count > 1) throw new Error('more than one suggestion is selected');
     if(!selected) {
         if(direction === 'up') {
-            suggestions[2].selected = true;
+            suggestions[suggestions.length - 1].selected = true;
         }
         else {
             suggestions[0].selected = true;
