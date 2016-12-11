@@ -1,7 +1,10 @@
 'use strict';
 // globals: PubSub
 
-const FOOD_SELECT = 'FOOD_SELECT';
+const events = {
+    FOOD_SELECT: 'FOOD_SELECT',
+    INGREDIENTS_CHANGE: 'INGREDIENTS_CHANGE'
+};
 const foods = [
     "asparagus",
     "apples",
@@ -142,14 +145,19 @@ function onType(text, callback) {
 }
 
 function onSelect(foodName) {
-    PubSub.publish(FOOD_SELECT, foodName);
+    PubSub.publish(events.FOOD_SELECT, foodName);
 }
+
+function onSave(ingredients) {
+    PubSub.publish(events.INGREDIENTS_CHANGE, ingredients);
+}
+
+var ingrid = new Ingrid(document.getElementById('ingrid_container'), onSave);
 
 function foodSelected(message, data) {
-    console.log(message);
-    console.log(data);
+    ingrid.add(data);
 }
 
-var foodSelectSubscription = PubSub.subscribe(FOOD_SELECT, foodSelected);
+var foodSelectSubscription = PubSub.subscribe(events.FOOD_SELECT, foodSelected);
 
-Suggest(document.getElementById('suggest-container'), onType, onSelect);
+Suggest(document.getElementById('suggest_container'), onType, onSelect);

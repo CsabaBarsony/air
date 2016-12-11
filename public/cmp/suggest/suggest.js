@@ -230,10 +230,6 @@ function Suggest(container, onType, onSelect, options) {
         input.value = e.data;
         suggestField.innerHTML = '';
     }
-
-    return {
-        name: 'I am a Suggest instance'
-    };
 }
 
 /**
