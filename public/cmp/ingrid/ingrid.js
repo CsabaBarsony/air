@@ -1,6 +1,38 @@
 'use strict';
 
-function Ingrid(container, ingredients, onSave) {
+function Ingrid(container, ingredients, onChange) {
+    function addClick(e) {
+        var amount = parseInt(e.target.parentElement.querySelector('input').value);
+        var index = parseInt(e.target.parentElement.attributes[0].value);
+        ingredients[index].editing = false;
+        ingredients[index].amount = amount;
+        container.innerHTML = '';
+        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
+        var ingredientResult = ingredients.map((ingredient) => {
+            return {
+                food: ingredient.food,
+                amount: ingredient.amount,
+                unit: ingredient.unit
+            };
+        });
+        onChange(ingredientResult);
+    }
+
+    function removeClick(e) {
+        var index = parseInt(e.target.parentElement.attributes[0].value);
+        ingredients.splice(index, 1);
+        container.innerHTML = '';
+        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
+        var ingredientResult = ingredients.map((ingredient) => {
+            return {
+                food: ingredient.food,
+                amount: ingredient.amount,
+                unit: ingredient.unit
+            };
+        });
+        onChange(ingredientResult);
+    }
+
     this.add = function(food) {
         var ingredientList = container.querySelector('ul');
         ingredients.forEach((ingredient, index) => {
@@ -17,10 +49,10 @@ function Ingrid(container, ingredients, onSave) {
             unit: Ingrid.units.G
         });
         container.innerHTML = '';
-        container.appendChild(Ingrid.render(ingredients, function() { alert('majom');   }));
+        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
     };
     container.innerHTML = '';
-    container.appendChild(Ingrid.render(ingredients, function() { alert('majom'); }));
+    container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
 }
 
 Ingrid.units = {
@@ -31,18 +63,22 @@ Ingrid.units = {
     CUP: 'cup'
 };
 
-Ingrid.render = function(ingredients, addClick) {
+Ingrid.render = function(ingredients, addClick, removeClick) {
     var ingredientList = document.createElement('ul');
+
     ingredients.forEach((ingredient, index) => {
         var ingredientItem = document.createElement('li');
+        var food           = document.createElement('span');
+
         ingredientItem.setAttribute('data-index', index);
-        var food = document.createElement('span');
-        food.innerHTML = ingredient.food;
         ingredientItem.appendChild(food);
+        food.innerHTML = ingredient.food;
+
         if(ingredient.editing) {
             var amountInput = document.createElement('input');
-            amountInput.value = ingredient.amount;
-            var unitSelect = document.createElement('select');
+            var unitSelect  = document.createElement('select');
+            var addButton   = document.createElement('button');
+
             for(var key in Ingrid.units) {
                 if(Ingrid.units.hasOwnProperty(key)) {
                     var unitOption = document.createElement('option');
@@ -51,18 +87,23 @@ Ingrid.render = function(ingredients, addClick) {
                     unitSelect.appendChild(unitOption);
                 }
             }
-            var addButton = document.createElement('button');
+
+            amountInput.value = ingredient.amount;
             addButton.textContent = 'Add';
             addButton.addEventListener('click', addClick);
+
             ingredientItem.appendChild(amountInput);
             ingredientItem.appendChild(unitSelect);
             ingredientItem.appendChild(addButton);
         }
         else {
             var amountDisplay = document.createElement('span');
-            amountDisplay.innerHTML = ingredient.amount + ingredient.unit;
             var removeButton = document.createElement('button');
+
+            amountDisplay.innerHTML = ingredient.amount + ingredient.unit;
             removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', removeClick);
+
             ingredientItem.appendChild(amountDisplay);
             ingredientItem.appendChild(removeButton);
         }

@@ -153,6 +153,14 @@
         PubSub.publish(events.INGREDIENTS_CHANGE, ingredients);
     }
 
+    function pie() {
+        PubSub.subscribe(events.INGREDIENTS_CHANGE, function(message, ingredients) {
+            console.log(ingredients);
+        });
+    }
+
+    pie();
+
     var ingredients = [
         {
             food: 'avocado',
