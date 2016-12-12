@@ -1,5 +1,21 @@
 describe('Suggest', function() {
-    describe('selectSuggestion', function() {
+    it('renderSuggestField()', function() {
+        var suggestField = Suggest.renderSuggestField();
+
+        expect(suggestField.tagName.toLowerCase()).toBe('div');
+        expect(suggestField.style.display).toBe('none');
+        expect(suggestField.classList[0]).toBe('suggest_field');
+    });
+
+    it('renderInput()', function() {
+        var emptyFunction = function() {};
+        var input = Suggest.renderInput(emptyFunction, emptyFunction, emptyFunction, emptyFunction);
+
+        expect(input.tagName.toLowerCase()).toBe('input');
+        expect(input.classList[0]).toBe('suggest_input');
+    });
+
+    describe('selectSuggestion()', function() {
         var suggestions, expected;
 
         beforeEach(function() {

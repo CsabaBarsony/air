@@ -133,23 +133,18 @@ function Suggest(container, onType, onSelect, options) {
     suggestContainer.className += 'suggest';
     container.appendChild(suggestContainer);
 
-    var input = document.createElement('input');
-    input.className += 'suggest-input';
-    input.onfocus = function() {
+    var input = Suggest.renderInput(function() {
         sc.gen('select');
-    };
-    input.onblur = function() {
+    }, function() {
         sc.gen('unselect');
-    };
-    input.addEventListener('input', function(e) {
+    }, function(e) {
         if(e.target.value === '') {
             sc.gen('clear');
         }
         else {
             sc.gen('type');
         }
-    });
-    input.addEventListener('keydown', function(e) {
+    }, function(e) {
         if(e.key === 'ArrowDown') {
             sc.gen('excite', 'down');
         }
@@ -157,11 +152,11 @@ function Suggest(container, onType, onSelect, options) {
             sc.gen('excite', 'up');
         }
     });
+
     suggestContainer.appendChild(input);
 
-    var suggestField = document.createElement('div');
-    suggestField.className += 'suggest-field';
-    suggestField.style.display = 'none';
+    var suggestField = Suggest.renderSuggestField();
+
     suggestContainer.appendChild(suggestField);
 
     function onVisibleEntry() {
@@ -231,6 +226,23 @@ function Suggest(container, onType, onSelect, options) {
         suggestField.innerHTML = '';
     }
 }
+
+Suggest.renderInput = function(onFocus, onBlur, onInput, onKeydown) {
+    var input = document.createElement('input');
+    input.className += 'suggest_input';
+    input.onfocus = onFocus;
+    input.onblur = onBlur;
+    input.addEventListener('input', onInput);
+    input.addEventListener('keydown', onKeydown);
+    return input;
+};
+
+Suggest.renderSuggestField = function() {
+    var suggestField = document.createElement('div');
+    suggestField.className += 'suggest_field';
+    suggestField.style.display = 'none';
+    return suggestField;
+};
 
 /**
  * @param {Array} suggestions Array of suggestions
