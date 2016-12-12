@@ -97,7 +97,7 @@
         "jambalaya",
         "jelly / jam",
         "jerky",
-        "jalapeño",
+        "jalapeï¿½o",
         "kale",
         "kabobs",
         "ketchup",
