@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>Ingrid</title>
+    </head>
+    <body>
+        <button onClick="addIngredient()">Add Ingredients</button>
+        <div id="ingrid_container"></div>
+        <script src="../../lib/react.js"></script>
+        <script src="../../lib/react-dom.js"></script>
+        <script src="ingrid.js"></script>
+        <script>
+            function onChange() {}
+
+            function addIngredient() {
+                ingrid.add('new food');
+            }
+
+            var ingredients = [
+                {
+                    food: 'avocado',
+                    editing: true,
+                    amount: 200,
+                    unit: Ingrid.units.G
+                },
+                {
+                    food: 'broccoli',
+                    editing: false,
+                    amount: 123,
+                    unit: Ingrid.units.G
+                }
+            ];
+
+            var ingrid = new Ingrid(document.getElementById('ingrid_container'), ingredients, onChange);
+        </script>
+    </body>
+</html>

@@ -1,7 +1,32 @@
 'use strict';
 
 function Ingrid(container, ingredients, onChange) {
-    function addClick(e) {
+    var list = React.createClass({
+        displayName: 'list',
+        render: function() {
+            var listItems = this.props.foods.map((food, i) => {
+                return React.createElement(listItem, { key: i, food: food });
+            });
+
+            return React.createElement('ul', null, listItems);
+        }
+    });
+
+    var listItem = React.createClass({
+        displayName: 'listItem',
+        render: function() {
+            return React.createElement('li', null, this.props.food);
+        }
+    });
+
+    var foods = [
+        'avocado',
+        'chicken'
+    ];
+
+    ReactDOM.render(React.createElement(list, { foods: foods }), container);
+
+    /*function addClick(e) {
         var amount = parseInt(e.target.parentElement.querySelector('input').value);
         var index = parseInt(e.target.parentElement.attributes[0].value);
         ingredients[index].editing = false;
@@ -52,7 +77,7 @@ function Ingrid(container, ingredients, onChange) {
         container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
     };
     container.innerHTML = '';
-    container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
+    container.appendChild(Ingrid.render(ingredients, addClick, removeClick));*/
 }
 
 Ingrid.units = {
