@@ -1,30 +1,40 @@
 'use strict';
 
 function Ingrid(container, ingredients, onChange) {
-    var list = React.createClass({
-        displayName: 'list',
+    var List = React.createClass({
+        getInitialState: function() {
+            return { ingredients: this.props.ingredients };
+        },
+        displayName: 'List',
         render: function() {
-            var listItems = this.props.foods.map((food, i) => {
-                return React.createElement(listItem, { key: i, food: food });
+            var items = this.state.ingredients.map((ingredient, index) => {
+                var food = React.createElement('span', null, ingredient.food);
+                var amount = ingredient.editing ?
+                    React.createElement('input', { value: ingredient.amount, onChange: this.amountChange }) :
+                    React.createElement('span',  null, ingredient.amount);
+                var unit = ingredient.editing ?
+                    React.createElement('input', { onChange: this.unitChange }) :
+                    React.createElement('span', null, ingredient.unit);
+
+                return React.createElement('li', { key: index, 'data-index': index }, food, amount, unit);
             });
 
-            return React.createElement('ul', null, listItems);
+            return React.createElement('ul', null, items);
+        },
+        amountChange: function(e) {
+            var index = e.target.parentElement.dataset.index;
+            var amount = parseInt(e.target.value);
+            var ing = this.state.ingredients;
+            ing[index].amount = amount;
+            this.setState({ ingredients: ing });
+        },
+        unitChange: function(e) {
+            var index = e.target.parentElement.dataset.index;
+            var amount = Ingrid.units[e.target.value];
         }
     });
 
-    var listItem = React.createClass({
-        displayName: 'listItem',
-        render: function() {
-            return React.createElement('li', null, this.props.food);
-        }
-    });
-
-    var foods = [
-        'avocado',
-        'chicken'
-    ];
-
-    ReactDOM.render(React.createElement(list, { foods: foods }), container);
+    ReactDOM.render(React.createElement(List, { ingredients: ingredients }), container);
 
     /*function addClick(e) {
         var amount = parseInt(e.target.parentElement.querySelector('input').value);
