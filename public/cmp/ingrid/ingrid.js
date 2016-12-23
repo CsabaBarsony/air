@@ -53,6 +53,55 @@ function Ingrid(container, ingredients, onChange) {
     };
     container.innerHTML = '';
     container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
+
+    this.render = function() {
+        var ingredientList = document.createElement('ul');
+
+        ingredients.forEach((ingredient, index) => {
+            var ingredientItem = document.createElement('li');
+            var food           = document.createElement('span');
+
+            ingredientItem.setAttribute('data-index', index);
+            ingredientItem.appendChild(food);
+            food.innerHTML = ingredient.food;
+
+            if(ingredient.editing) {
+                var amountInput = document.createElement('input');
+                var unitSelect  = document.createElement('select');
+                var addButton   = document.createElement('button');
+
+                for(var key in Ingrid.units) {
+                    if(Ingrid.units.hasOwnProperty(key)) {
+                        var unitOption = document.createElement('option');
+                        unitOption.value = Ingrid.units[key];
+                        unitOption.innerHTML = Ingrid.units[key];
+                        unitSelect.appendChild(unitOption);
+                    }
+                }
+
+                amountInput.value = ingredient.amount;
+                addButton.textContent = 'Add';
+                addButton.addEventListener('click', addClick);
+
+                ingredientItem.appendChild(amountInput);
+                ingredientItem.appendChild(unitSelect);
+                ingredientItem.appendChild(addButton);
+            }
+            else {
+                var amountDisplay = document.createElement('span');
+                var removeButton = document.createElement('button');
+
+                amountDisplay.innerHTML = ingredient.amount + ingredient.unit;
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', removeClick);
+
+                ingredientItem.appendChild(amountDisplay);
+                ingredientItem.appendChild(removeButton);
+            }
+            ingredientList.appendChild(ingredientItem);
+        });
+        return ingredientList;
+    }
 }
 
 Ingrid.units = {
@@ -64,15 +113,24 @@ Ingrid.units = {
 };
 
 Ingrid.render = function(ingredients, addClick, removeClick) {
-    var ingredientList = document.createElement('ul');
+    var template =
+        `<ul>
+            {{#ingredients}}
+            <li>
+                <span>{{food}}</span>
+            </li>
+            {{/ingredients}}
+        </ul>`;
+
+    /*var ingredientList = document.createElement('ul');
 
     ingredients.forEach((ingredient, index) => {
         var ingredientItem = document.createElement('li');
         var food           = document.createElement('span');
 
         ingredientItem.setAttribute('data-index', index);
-        ingredientItem.appendChild(food);
         food.innerHTML = ingredient.food;
+        ingredientItem.appendChild(food);
 
         if(ingredient.editing) {
             var amountInput = document.createElement('input');
@@ -108,6 +166,10 @@ Ingrid.render = function(ingredients, addClick, removeClick) {
             ingredientItem.appendChild(removeButton);
         }
         ingredientList.appendChild(ingredientItem);
-    });
-    return ingredientList;
+    });*/
+
+    var container = document.createElement('div');
+    var x = Mustache.render(template, { ingredients: ingredients });
+    container.innerHTML = x;
+    return container;
 };
