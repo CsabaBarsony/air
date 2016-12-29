@@ -1,14 +1,44 @@
 'use strict';
 
+/*function Component() {
+    this.container = container;
+    this.model = model ? model : {};
+    this.callback = callback ? callback : undefined;
+    debugger
+
+    this.render = function(template) {
+        debugger
+    }
+}
+
+function Ing(container, model, callback) {
+    this.model = model ? model : { foods: [] };
+
+    this.add = function(food) {
+        this.model.foods.push(food);
+        this.render();
+    }
+}
+
+Ing.prototype = new Component();
+
+var ing = new Ing(document.createElement('div'), null);
+ing.add('avocado');
+debugger*/
+
 function Ingrid(container, ingredients, onChange) {
+    var model = {
+        ingredients: ingredients
+    };
+
     function addClick(e) {
         var amount = parseInt(e.target.parentElement.querySelector('input').value);
-        var index = parseInt(e.target.parentElement.attributes[0].value);
-        ingredients[index].editing = false;
-        ingredients[index].amount = amount;
+        var ingredient = model.ingredients[e.target.parentElement.dataset.index];
+        ingredient.editing = false;
+        ingredient.amount = amount;
         container.innerHTML = '';
-        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
-        var ingredientResult = ingredients.map((ingredient) => {
+        container.appendChild(render());
+        var ingredientResult = model.ingredients.map((ingredient) => {
             return {
                 food: ingredient.food,
                 amount: ingredient.amount,
@@ -19,11 +49,10 @@ function Ingrid(container, ingredients, onChange) {
     }
 
     function removeClick(e) {
-        var index = parseInt(e.target.parentElement.attributes[0].value);
-        ingredients.splice(index, 1);
+        model.ingredients.splice(e.target.parentElement.dataset.index, 1);
         container.innerHTML = '';
-        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
-        var ingredientResult = ingredients.map((ingredient) => {
+        container.appendChild(render());
+        var ingredientResult = model.ingredients.map((ingredient) => {
             return {
                 food: ingredient.food,
                 amount: ingredient.amount,
@@ -33,75 +62,62 @@ function Ingrid(container, ingredients, onChange) {
         onChange(ingredientResult);
     }
 
+    function render() {
+        var templateString =
+            `{{#each ingredients}}
+            <li data-index="{{@index}}">
+                {{#if editing}}
+                <span>{{food}}</span>
+                <input type="text" value="{{amount}}" />
+                <select name="" id="">
+                    {{#each ../units}}
+                    <option>{{.}}</option>
+                    {{/each}}
+                </select>
+                <button class="add">Add</button>
+                {{else}}
+                <span>{{food}}</span>
+                <span>{{amount}}</span>
+                <span>{{unit}}</span>
+                <button class="remove">Remove</button>
+                {{/if}}
+            </li>
+            {{/each}}
+            `;
+
+        var list = document.createElement('ul');
+        var templateData = {
+            ingredients: model.ingredients,
+            units: Ingrid.units
+        };
+        var template = Handlebars.compile(templateString, templateData);
+        list.innerHTML = template(templateData);
+        list.querySelectorAll('button.add')   .forEach(b => b.onclick = addClick);
+        list.querySelectorAll('button.remove').forEach(b => b.onclick = removeClick);
+        return list;
+    }
+
     this.add = function(food) {
         var ingredientList = container.querySelector('ul');
-        ingredients.forEach((ingredient, index) => {
+        model.ingredients.forEach((ingredient, index) => {
             if(ingredient.editing) {
                 var amount = parseInt(ingredientList.querySelector('li[data-index="' + index + '"] input').value);
                 ingredient.amount = isNaN(amount) ? 0 : amount;
             }
             ingredient.editing = false;
         });
-        ingredients.push({
+        model.ingredients.push({
             food: food,
             editing: true,
             amount: null,
             unit: Ingrid.units.G
         });
         container.innerHTML = '';
-        container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
+        container.appendChild(render());
     };
+
     container.innerHTML = '';
-    container.appendChild(Ingrid.render(ingredients, addClick, removeClick));
-
-    this.render = function() {
-        var ingredientList = document.createElement('ul');
-
-        ingredients.forEach((ingredient, index) => {
-            var ingredientItem = document.createElement('li');
-            var food           = document.createElement('span');
-
-            ingredientItem.setAttribute('data-index', index);
-            ingredientItem.appendChild(food);
-            food.innerHTML = ingredient.food;
-
-            if(ingredient.editing) {
-                var amountInput = document.createElement('input');
-                var unitSelect  = document.createElement('select');
-                var addButton   = document.createElement('button');
-
-                for(var key in Ingrid.units) {
-                    if(Ingrid.units.hasOwnProperty(key)) {
-                        var unitOption = document.createElement('option');
-                        unitOption.value = Ingrid.units[key];
-                        unitOption.innerHTML = Ingrid.units[key];
-                        unitSelect.appendChild(unitOption);
-                    }
-                }
-
-                amountInput.value = ingredient.amount;
-                addButton.textContent = 'Add';
-                addButton.addEventListener('click', addClick);
-
-                ingredientItem.appendChild(amountInput);
-                ingredientItem.appendChild(unitSelect);
-                ingredientItem.appendChild(addButton);
-            }
-            else {
-                var amountDisplay = document.createElement('span');
-                var removeButton = document.createElement('button');
-
-                amountDisplay.innerHTML = ingredient.amount + ingredient.unit;
-                removeButton.textContent = 'Remove';
-                removeButton.addEventListener('click', removeClick);
-
-                ingredientItem.appendChild(amountDisplay);
-                ingredientItem.appendChild(removeButton);
-            }
-            ingredientList.appendChild(ingredientItem);
-        });
-        return ingredientList;
-    }
+    container.appendChild(render());
 }
 
 Ingrid.units = {
@@ -110,66 +126,4 @@ Ingrid.units = {
     OZ: 'oz',
     LB: 'lb',
     CUP: 'cup'
-};
-
-Ingrid.render = function(ingredients, addClick, removeClick) {
-    var template =
-        `<ul>
-            {{#ingredients}}
-            <li>
-                <span>{{food}}</span>
-            </li>
-            {{/ingredients}}
-        </ul>`;
-
-    /*var ingredientList = document.createElement('ul');
-
-    ingredients.forEach((ingredient, index) => {
-        var ingredientItem = document.createElement('li');
-        var food           = document.createElement('span');
-
-        ingredientItem.setAttribute('data-index', index);
-        food.innerHTML = ingredient.food;
-        ingredientItem.appendChild(food);
-
-        if(ingredient.editing) {
-            var amountInput = document.createElement('input');
-            var unitSelect  = document.createElement('select');
-            var addButton   = document.createElement('button');
-
-            for(var key in Ingrid.units) {
-                if(Ingrid.units.hasOwnProperty(key)) {
-                    var unitOption = document.createElement('option');
-                    unitOption.value = Ingrid.units[key];
-                    unitOption.innerHTML = Ingrid.units[key];
-                    unitSelect.appendChild(unitOption);
-                }
-            }
-
-            amountInput.value = ingredient.amount;
-            addButton.textContent = 'Add';
-            addButton.addEventListener('click', addClick);
-
-            ingredientItem.appendChild(amountInput);
-            ingredientItem.appendChild(unitSelect);
-            ingredientItem.appendChild(addButton);
-        }
-        else {
-            var amountDisplay = document.createElement('span');
-            var removeButton = document.createElement('button');
-
-            amountDisplay.innerHTML = ingredient.amount + ingredient.unit;
-            removeButton.textContent = 'Remove';
-            removeButton.addEventListener('click', removeClick);
-
-            ingredientItem.appendChild(amountDisplay);
-            ingredientItem.appendChild(removeButton);
-        }
-        ingredientList.appendChild(ingredientItem);
-    });*/
-
-    var container = document.createElement('div');
-    var x = Mustache.render(template, { ingredients: ingredients });
-    container.innerHTML = x;
-    return container;
 };
