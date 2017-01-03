@@ -1,35 +1,56 @@
 'use strict';
-
-/*function Component() {
-    this.container = container;
-    this.model = model ? model : {};
-    this.callback = callback ? callback : undefined;
-    debugger
-
-    this.render = function(template) {
-        debugger
-    }
-}
-
-function Ing(container, model, callback) {
-    this.model = model ? model : { foods: [] };
-
-    this.add = function(food) {
-        this.model.foods.push(food);
-        this.render();
-    }
-}
-
-Ing.prototype = new Component();
-
-var ing = new Ing(document.createElement('div'), null);
-ing.add('avocado');
-debugger*/
+//globals: scion
 
 function Ingrid(container, ingredients, onChange) {
     var model = {
-        ingredients: ingredients
+        ingredients: ingredients,
+        update: function(ingredients) {
+            this.ingredients = ingredients;
+            render();
+        }
     };
+
+    var chart = {
+        states: [
+            {
+                id: 'Listing',
+                transitions: [
+                    {
+                        event: 'edit',
+                        target: 'Editing'
+                    },
+                    {
+                        event: 'add',
+                        target: 'Adding'
+                    }
+                ],
+                onEntry: onListingEntry
+            },
+            {
+                id: 'Editing',
+                onEntry: onEditingEntry
+            },
+            {
+                id: 'Adding',
+                onEntry: onAddingEntry
+            }
+        ]
+    };
+
+    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: true });
+    sc.start();
+
+    function onListingEntry(action) {
+        model.update();
+    }
+
+    function onEditingEntry(action) {
+
+    }
+
+    function onAddingEntry(action) {
+
+    }
 
     function addClick(e) {
         var amount = parseInt(e.target.parentElement.querySelector('input').value);
@@ -94,7 +115,8 @@ function Ingrid(container, ingredients, onChange) {
         list.innerHTML = template(templateData);
         list.querySelectorAll('button.add')   .forEach(b => b.onclick = addClick);
         list.querySelectorAll('button.remove').forEach(b => b.onclick = removeClick);
-        return list;
+        container.innerHTML = '';
+        container.appendChild(list);
     }
 
     this.add = function(food) {
@@ -115,9 +137,6 @@ function Ingrid(container, ingredients, onChange) {
         container.innerHTML = '';
         container.appendChild(render());
     };
-
-    container.innerHTML = '';
-    container.appendChild(render());
 }
 
 Ingrid.units = {
