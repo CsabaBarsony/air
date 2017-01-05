@@ -128,7 +128,9 @@ function Suggest(container, onType, onSelect, options) {
         suggestions.forEach((s) => {
             if(s.selected) selected = s.text;
         });
-        if(e.key === 'Enter') sc.gen('choose', selected);
+        if(e.key === 'Enter') {
+            sc.gen('choose', selected);
+        }
     });
     suggestContainer.className += 'suggest';
     container.appendChild(suggestContainer);
@@ -173,6 +175,7 @@ function Suggest(container, onType, onSelect, options) {
         pendingLoadings++;
         suggestField.innerHTML = 'loading...';
         onType(input.value, function(suggestions) {
+            // Itt van vmi gond
             pendingLoadings--;
             // TODO: right sequence of callbacks is not guaranteed
             if(pendingLoadings === 0) {
@@ -186,9 +189,9 @@ function Suggest(container, onType, onSelect, options) {
     }
 
     function onSuggestingEntry(e) {
-        suggestions = e.data.map(function(d) {
+        suggestions = e.data.map(function(food) {
             return {
-                text: d,
+                food: d,
                 selected: false
             };
         });

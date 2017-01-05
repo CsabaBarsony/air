@@ -1,5 +1,5 @@
 'use strict';
-//globals: scion
+//globals: scion, Handlebars, bella
 
 function Ingrid(container, originalIngredients, onChange) {
     var ingredients = bella.immutable.deepClone(originalIngredients);
@@ -103,7 +103,7 @@ function Ingrid(container, originalIngredients, onChange) {
             ingredients: ingredients,
             units: Ingrid.units
         };
-        var template = Handlebars.compile(templateString, templateData);
+        var template = Handlebars.compile(templateString);
         list.innerHTML = template(templateData);
         list.querySelectorAll('button.add')   .forEach(b => b.onclick = addClick);
         list.querySelectorAll('button.remove').forEach(b => b.onclick = removeClick);

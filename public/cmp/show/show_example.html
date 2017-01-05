@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>Show</title>
+    </head>
+    <body>
+        <div id="show_container"></div>
+
+        <script src="../../lib/handlebars.js"></script>
+        <script src="../../lib/scion.js"></script>
+        <script src="../../lib/bella.js"></script>
+        <script src="show.js"></script>
+        <script>
+            var show = new Show(document.getElementById('show_container'));
+            show.update({});
+        </script>
+    </body>
+</html>

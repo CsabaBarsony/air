@@ -1,3 +1,5 @@
+'use strict';
+
 var bella = {
     immutable: {
         deepClone: function(original) {

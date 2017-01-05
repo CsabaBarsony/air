@@ -43,11 +43,11 @@
     ];
 
     var server = {
-        getFoodNameSuggestion: function(text, callback) {
+        getFoodSuggestion: function(text, callback) {
             var results = [];
             foods.forEach((food) => {
                 var regex = new RegExp('^' + text, 'gi');
-                if(regex.test(food.name)) results.push(food.name);
+                if(regex.test(food.name)) results.push(food);
             });
             setTimeout(function() {
                 callback(results);
@@ -55,7 +55,7 @@
         },
         getFood: function(foodName) {
             foods.forEach((food) => {
-                if(food.name === foodName) PubSub.publish(events.FOOD_SELECT, foodName);
+                if(food.name === foodName) PubSub.publish(events.FOOD_SELECT, food);
             });
         }
     };
@@ -95,5 +95,5 @@
 
     var foodSelectSubscription = PubSub.subscribe(events.FOOD_SELECT, foodSelected);
 
-    Suggest(document.getElementById('suggest_container'), server.getFoodNameSuggestion, server.getFood);
+    Suggest(document.getElementById('suggest_container'), server.getFoodSuggestion, server.getFood);
 })();
