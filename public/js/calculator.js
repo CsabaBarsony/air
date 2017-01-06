@@ -65,23 +65,35 @@
         PubSub.publish(events.INGREDIENTS_CHANGE, ingredients);
     }
 
-    function pie() {
-        PubSub.subscribe(events.INGREDIENTS_CHANGE, function(message, ingredients) {
-            console.log(ingredients);
-        });
-    }
+    var show = new Show(document.getElementById('show_container'));
 
-    pie();
+    PubSub.subscribe(events.INGREDIENTS_CHANGE, function(message, ingredients) {
+        show.update(ingredients);
+    });
 
     var ingredients = [
         {
-            food: 'cheese',
+            food: {
+                name: 'avocado',
+                macros: {
+                    ch: 10,
+                    fat: 60,
+                    p: 10
+                }
+            },
             editing: true,
             amount: 200,
             unit: Ingrid.units.G
         },
         {
-            food: 'chicken',
+            food: {
+                name: 'broccoli',
+                macros: {
+                    ch: 40,
+                    fat: 5,
+                    p: 10
+                }
+            },
             editing: false,
             amount: 123,
             unit: Ingrid.units.G
@@ -91,7 +103,7 @@
     var ingrid = new Ingrid(document.getElementById('ingrid_container'), ingredients, onSave);
 
     function foodSelected(message, data) {
-        ingrid.add(data);
+        ingrid.add(data.data);
     }
 
     var foodSelectSubscription = PubSub.subscribe(events.FOOD_SELECT, foodSelected);

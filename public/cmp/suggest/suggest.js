@@ -180,7 +180,7 @@ function Suggest(container, onType, onSelect) {
     suggestContainer.addEventListener('keydown', function(e) {
         var selected;
         suggestions.forEach((s) => {
-            if(s.selected) selected = s.text;
+            if(s.selected) selected = s;
         });
         if(e.key === 'Enter') {
             sc.gen('choose', selected);

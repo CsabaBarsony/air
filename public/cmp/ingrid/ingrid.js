@@ -80,7 +80,7 @@ function Ingrid(container, originalIngredients, onChange) {
             `{{#each ingredients}}
             <li data-index="{{@index}}">
                 {{#if editing}}
-                <span>{{food}}</span>
+                <span>{{food.name}}</span>
                 <input type="text" value="{{amount}}" />
                 <select name="" id="">
                     {{#each ../units}}
@@ -89,7 +89,7 @@ function Ingrid(container, originalIngredients, onChange) {
                 </select>
                 <button class="add">Add</button>
                 {{else}}
-                <span>{{food}}</span>
+                <span>{{food.name}}</span>
                 <span>{{amount}}</span>
                 <span>{{unit}}</span>
                 <button class="remove">Remove</button>
@@ -134,6 +134,5 @@ Ingrid.units = {
     G: 'g',
     MG: 'mg',
     OZ: 'oz',
-    LB: 'lb',
-    CUP: 'cup'
+    LB: 'lb'
 };

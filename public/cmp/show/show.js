@@ -40,6 +40,20 @@ function Show(container) {
 }
 
 Show.calculateMacros = function(ingredients) {
+    function convertToGram(ingredient) {
+        // TODO
+        return ingredient;
+    }
+
+    var sumCh = 0;
+    var sumFat = 0;
+    var sumProtein = 0;
+
+    ingredients.forEach((ingredient) => {
+        ingredient = convertToGram(ingredient);
+        sumCh += ingredient;
+    });
+
     var macros;
     return macros;
 };
