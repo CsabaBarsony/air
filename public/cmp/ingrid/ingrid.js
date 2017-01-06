@@ -31,7 +31,7 @@ function Ingrid(container, originalIngredients, onChange) {
         ]
     };
 
-    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: true });
+    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: false });
     sc.start();
 
     function onListingEntry(action) {

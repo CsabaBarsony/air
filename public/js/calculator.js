@@ -47,16 +47,17 @@
             var results = [];
             foods.forEach((food) => {
                 var regex = new RegExp('^' + text, 'gi');
-                if(regex.test(food.name)) results.push(food);
+                if(regex.test(food.name)) results.push({
+                    text: food.name,
+                    data: food
+                });
             });
             setTimeout(function() {
                 callback(results);
             }, 300);
         },
-        getFood: function(foodName) {
-            foods.forEach((food) => {
-                if(food.name === foodName) PubSub.publish(events.FOOD_SELECT, food);
-            });
+        getFood: function(food) {
+            PubSub.publish(events.FOOD_SELECT, food);
         }
     };
 

@@ -1,125 +1,179 @@
 'use strict';
-//globals: scion
+//globals: scion, Handlebars
 
-function Suggest(container, onType, onSelect, options) {
-    if(!options) options = {
-        logStatesEnteredAndExited: false
-    };
+function Suggest(container, onType, onSelect) {
     var suggestions = [];
-    var chart = {
-        states: [
-            {
-                id: 'blur',
-                onEntry: onBlurEntry,
-                transitions: [
-                    {
-                        event: 'select',
-                        target: 'focus'
-                    }
-                ]
+    var pendingLoadings = 0;
+    var actions = {
+        visible: {
+            entry: function() {
+                suggestField.style.display = 'block';
             },
-            {
-                id: 'focus',
-                transitions: [
-                    {
-                        event: 'unselect',
-                        target: 'blur'
-                    }
-                ],
-                states: [
-                    {
-                        id: 'hidden',
-                        transitions: [
-                            {
-                                event: 'type',
-                                target: 'loading'
-                            }
-                        ]
-                    },
-                    {
-                        id: 'visible',
-                        onEntry: onVisibleEntry,
-                        onExit: onVisibleExit,
-                        states: [
-                            {
-                                id: 'loading',
-                                onEntry: onLoadingEntry,
-                                onExit: onLoadingExit,
-                                transitions: [
-                                    {
-                                        event: 'load',
-                                        target: 'typing'
-                                    },
-                                    {
-                                        event: 'clear',
-                                        target: 'hidden'
-                                    },
-                                    {
-                                        event: 'type',
-                                        target: 'loading'
-                                    }
-                                ]
-                            },
-                            {
-                                id: 'suggesting',
-                                onEntry: onSuggestingEntry,
-                                transitions: [
-                                    {
-                                        event: 'type',
-                                        target: 'loading'
-                                    },
-                                    {
-                                        event: 'clear',
-                                        target: 'hidden'
-                                    },
-                                    {
-                                        event: 'choose',
-                                        target: 'chosen'
-                                    }
-                                ],
-                                states: [
-                                    {
-                                        id: 'typing',
-                                        transitions: [
-                                            {
-                                                event: 'excite',
-                                                target: 'excited'
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        id: 'excited',
-                                        onEntry: onExcitedEntry,
-                                        transitions: [
-                                            {
-                                                event: 'excite',
-                                                target: 'excited'
-                                            },
-                                            {
-                                                event: 'bore',
-                                                target: 'typing'
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        id: 'chosen',
-                        onEntry: onChosenEntry,
-                        transitions: [
-                            {
-                                event: 'type',
-                                target: 'loading'
-                            }
-                        ]
-                    }
-                ]
+            exit: function() {
+                suggestField.style.display = 'none';
+
             }
-        ]
+        },
+        loading: {
+            entry: function() {
+                pendingLoadings++;
+                suggestField.innerHTML = 'loading...';
+                onType(input.value, function(incomingList) {
+                    // Entry point of list, maybe a type check would be necessary
+                    pendingLoadings--;
+                    // TODO: right sequence of callbacks is not guaranteed
+                    if(pendingLoadings === 0) {
+                        var suggestions = incomingList.map((item) => {
+                            item.selected = false;
+                            return item;
+                        });
+                        sc.gen('load', suggestions);
+                    }
+                });
+            },
+            exit: function() {
+                suggestField.innerHTML = '';
+            }
+        },
+        suggesting: {
+            entry: function(e) {
+                suggestions = e.data;
+                render();
+            }
+        },
+        excited: {
+            entry: function(e) {
+                suggestions = Suggest.selectSuggestion(suggestions, e.data);
+                render();
+            }
+        },
+        blur: {
+            entry: function() {
+                suggestField.innerHTML = '';
+                suggestField.style.display = 'none';
+            }
+        },
+        chosen: {
+            entry: function(e) {
+                onSelect(e.data);
+                input.value = '';
+                suggestField.innerHTML = '';
+            }
+        }
     };
-    var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: options.logStatesEnteredAndExited });
+    var states = [
+        {
+            id: 'blur',
+            onEntry: actions.blur.entry,
+            transitions: [
+                {
+                    event: 'select',
+                    target: 'focus'
+                }
+            ]
+        },
+        {
+            id: 'focus',
+            transitions: [
+                {
+                    event: 'unselect',
+                    target: 'blur'
+                }
+            ],
+            states: [
+                {
+                    id: 'hidden',
+                    transitions: [
+                        {
+                            event: 'type',
+                            target: 'loading'
+                        }
+                    ]
+                },
+                {
+                    id: 'visible',
+                    onEntry: actions.visible.entry,
+                    onExit: actions.visible.exit,
+                    states: [
+                        {
+                            id: 'loading',
+                            onEntry: actions.loading.entry,
+                            onExit: actions.loading.exit,
+                            transitions: [
+                                {
+                                    event: 'load',
+                                    target: 'typing'
+                                },
+                                {
+                                    event: 'clear',
+                                    target: 'hidden'
+                                },
+                                {
+                                    event: 'type',
+                                    target: 'loading'
+                                }
+                            ]
+                        },
+                        {
+                            id: 'suggesting',
+                            onEntry: actions.suggesting.entry,
+                            transitions: [
+                                {
+                                    event: 'type',
+                                    target: 'loading'
+                                },
+                                {
+                                    event: 'clear',
+                                    target: 'hidden'
+                                },
+                                {
+                                    event: 'choose',
+                                    target: 'chosen'
+                                }
+                            ],
+                            states: [
+                                {
+                                    id: 'typing',
+                                    transitions: [
+                                        {
+                                            event: 'excite',
+                                            target: 'excited'
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 'excited',
+                                    onEntry: actions.excited.entry,
+                                    transitions: [
+                                        {
+                                            event: 'excite',
+                                            target: 'excited'
+                                        },
+                                        {
+                                            event: 'bore',
+                                            target: 'typing'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'chosen',
+                    onEntry: actions.chosen.entry,
+                    transitions: [
+                        {
+                            event: 'type',
+                            target: 'loading'
+                        }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    var sc = new scion.Statechart({ states: states }, { logStatesEnteredAndExited: false });
     sc.start();
 
     var suggestContainer = document.createElement('div');
@@ -161,72 +215,14 @@ function Suggest(container, onType, onSelect, options) {
 
     suggestContainer.appendChild(suggestField);
 
-    function onVisibleEntry() {
-        suggestField.style.display = 'block';
-    }
-
-    function onVisibleExit() {
-        suggestField.style.display = 'none';
-    }
-
-    var pendingLoadings = 0;
-
-    function onLoadingEntry() {
-        pendingLoadings++;
-        suggestField.innerHTML = 'loading...';
-        onType(input.value, function(suggestions) {
-            // Itt van vmi gond
-            pendingLoadings--;
-            // TODO: right sequence of callbacks is not guaranteed
-            if(pendingLoadings === 0) {
-                sc.gen('load', suggestions);
-            }
-        });
-    }
-
-    function onLoadingExit() {
-        suggestField.innerHTML = '';
-    }
-
-    function onSuggestingEntry(e) {
-        suggestions = e.data.map(function(food) {
-            return {
-                food: d,
-                selected: false
-            };
-        });
-        var list = document.createElement('ul');
-        suggestions.forEach((s) => {
-            var listElement = document.createElement('li');
-            listElement.innerHTML = s.text;
-            list.appendChild(listElement);
-        });
-        suggestField.innerHTML = '';
-        suggestField.appendChild(list);
-    }
-
-    function onExcitedEntry(e) {
-        var newSuggestions = Suggest.selectSuggestion(suggestions, e.data);
-        var list = document.createElement('ul');
-        newSuggestions.forEach((s) => {
-            var listElement = document.createElement('li');
-            listElement.innerHTML = s.text;
-            if(s.selected) listElement.className += 'selected';
-            list.appendChild(listElement);
-        });
-        suggestField.innerHTML = '';
-        suggestField.appendChild(list);
-    }
-
-    function onBlurEntry() {
-        suggestField.innerHTML = '';
-        suggestField.style.display = 'none';
-    }
-
-    function onChosenEntry(e) {
-        onSelect(e.data);
-        input.value = e.data;
-        suggestField.innerHTML = '';
+    function render() {
+        var template = `
+            <ul>
+                {{#each suggestions}}
+                <li{{#if selected}} class="selected"{{/if}}>{{text}}</li>
+                {{/each}}            
+            </ul>`;
+        suggestField.innerHTML = Handlebars.compile(template)({ suggestions: suggestions });
     }
 }
 
