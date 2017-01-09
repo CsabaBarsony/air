@@ -25,7 +25,7 @@
 
     /**
      *
-     * @enum
+     * @enum {string}
      */
     var Unit = {
         G: 'g',

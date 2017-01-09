@@ -1,5 +1,5 @@
 'use strict';
-//globals: nutrit, scion, Handlebars
+//globals: scion, Handlebars
 
 (function() {
     /**
@@ -251,6 +251,7 @@
      * @returns {Suggestion[]}
      */
     Suggest.selectSuggestion = function(suggestions, direction) {
+        if(!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Suggestions parameter should be an array containing at least one element.');
         var selected, selectedIndex, first, last, count = 0;
         suggestions.forEach((s, i) => {
             if(s.selected) {

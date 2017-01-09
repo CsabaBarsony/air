@@ -1,5 +1,4 @@
 'use strict';
-// globals: PubSub, suggest
 
 (function(){
     const events = {
@@ -7,6 +6,9 @@
         INGREDIENTS_CHANGE: 'INGREDIENTS_CHANGE'
     };
 
+    /**
+     * @type {{avocado: Food, broccoli: Food, carrots: Food, cheese: Food, chicken: Food, chips: Food}}
+     */
     var foods = {
         avocado:  new nutrit.Food('avocado' , new nutrit.Macros(10, 60, 10)),
         broccoli: new nutrit.Food('broccoli', new nutrit.Macros(40, 5,  10)),
@@ -21,21 +23,21 @@
          * @param {string} text
          * @param {function(Suggestion[])} callback
          */
-        getFoodSuggestion: function(text, callback) {
+        getSuggestions: function(text, callback) {
             /* @type {Suggestion[]} */
-            var results = Object.keys(foods).filter(key => {
-                var r = new RegExp('^' + text, 'gi');
-                if(r.test(foods[key].name)) return new suggest.Suggestion(foods[key].name, foods[key]);
+            var results = [];
+            Object.keys(foods).forEach(key => {
+                if(new RegExp('^' + text, 'gi').test(foods[key].name)) results.push(new suggest.Suggestion(foods[key].name, foods[key]));
             });
             setTimeout(function() {
                 callback(results);
             }, 300);
         },
         /**
-         * @param {Food} food
+         * @param {Suggestion} suggestion
          */
-        getFood: function(food) {
-            PubSub.publish(events.FOOD_SELECT, food);
+        getSelectedSuggestion: function(suggestion) {
+            PubSub.publish(events.FOOD_SELECT, suggestion.data);
         }
     };
 
@@ -55,11 +57,11 @@
 
     var ingrid = new Ingrid(document.getElementById('ingrid_container'), ingredients, onSave);
 
-    function foodSelected(message, data) {
-        ingrid.add(data.data);
+    function foodSelected(message, food) {
+        ingrid.add(food);
     }
 
     PubSub.subscribe(events.FOOD_SELECT, foodSelected);
 
-    new suggest.Suggest(document.getElementById('suggest_container'), server.getFoodSuggestion, server.getFood);
+    new suggest.Suggest(document.getElementById('suggest_container'), server.getSuggestions, server.getSelectedSuggestion);
 })();

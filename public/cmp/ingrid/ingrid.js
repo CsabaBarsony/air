@@ -1,16 +1,15 @@
 'use strict';
-//globals: scion, Handlebars, bella
+//globals: nutrit, scion, Handlebars
 
 /**
+ * Ingrid component
  *
  * @param {HTMLElement} container
- * @param {Food[]} originalIngredients
- * @param onChange {function}
+ * @param {Ingredient[]} ingredients
+ * @param {function(Ingredient[])} onChange
  * @constructor
  */
-function Ingrid(container, originalIngredients, onChange) {
-    var ingredients = bella.immutable.deepClone(originalIngredients);
-
+function Ingrid(container, ingredients, onChange) {
     var chart = {
         states: [
             {
@@ -59,27 +58,13 @@ function Ingrid(container, originalIngredients, onChange) {
         ingredient.editing = false;
         ingredient.amount = amount || 0;
         render();
-        var ingredientResult = ingredients.map((ingredient) => {
-            return {
-                food: ingredient.food,
-                amount: ingredient.amount,
-                unit: ingredient.unit
-            };
-        });
-        onChange(ingredientResult);
+        onChange(ingredients);
     }
 
     function removeClick(e) {
         ingredients.splice(e.target.parentElement.dataset.index, 1);
         render();
-        var ingredientResult = ingredients.map((ingredient) => {
-            return {
-                food: ingredient.food,
-                amount: ingredient.amount,
-                unit: ingredient.unit
-            };
-        });
-        onChange(ingredientResult);
+        onChange(ingredients);
     }
 
     function render() {
@@ -118,6 +103,9 @@ function Ingrid(container, originalIngredients, onChange) {
         container.appendChild(list);
     }
 
+    /**
+     * @param {Food} food
+     */
     this.add = function(food) {
         var ingredientList = container.querySelector('ul');
         ingredients.forEach((ingredient, index) => {
@@ -127,12 +115,9 @@ function Ingrid(container, originalIngredients, onChange) {
             }
             ingredient.editing = false;
         });
-        ingredients.push({
-            food: food,
-            editing: true,
-            amount: null,
-            unit: nutrit.Unit.G
-        });
+        var newIngredient = new nutrit.Ingredient(food, 0, nutrit.Unit.G);
+        newIngredient.editing = true;
+        ingredients.push(newIngredient);
         render();
     };
 }
