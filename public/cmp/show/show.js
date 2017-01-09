@@ -1,45 +1,68 @@
 'use strict';
-//globals: Handlebars
+//globals: nutrit, Handlebars
 
+/**
+ * Show component
+ *
+ * @param {HTMLElement} container
+ * @constructor
+ */
 function Show(container) {
+    /* @type {Ingredient[]} */
     var ingredients = [];
 
+    /**
+     * @param {Ingredient[]} newIngredients
+     */
     this.update = function(newIngredients) {
         ingredients = newIngredients;
         render();
     };
 
     function render() {
-        var macros = [
-            {
-                name: 'ch',
-                value: 10
-            },
-            {
-                name: 'fat',
-                value: 20
-            },
-            {
-                name: 'protein',
-                value: 30
-            }
-        ];
+        if(ingredients.length === 0) {
+            container.innerHTML = '';
+        }
+        else {
+            var macros = [
+                {
+                    name: 'ch',
+                    value: 10
+                },
+                {
+                    name: 'fat',
+                    value: 20
+                },
+                {
+                    name: 'protein',
+                    value: 30
+                }
+            ];
 
-        var templateString =
-            `<ul>
+            var templateString =
+                `<ul>
                 {{#each macros}}
                 <li>
-                    <span>{{name}}: {{value}}</span>                
+                    <span>{{name}}: {{value}}</span>
                 </li>
                 {{/each}}
             </ul>
             `;
-        var template = Handlebars.compile(templateString);
-        container.innerHTML = template({ macros: macros });
+
+            container.innerHTML = Handlebars.compile(templateString)({ macros: Show.calculateMacros(ingredients) });
+        }
     }
 }
 
+/**
+ * @param {Ingredient[]} ingredients
+ * @returns {Macros}
+ */
 Show.calculateMacros = function(ingredients) {
+    /**
+     * @param {Ingredient} ingredient
+     * @returns {Ingredient}
+     */
     function convertToGram(ingredient) {
         // TODO
         return ingredient;
@@ -54,6 +77,5 @@ Show.calculateMacros = function(ingredients) {
         sumCh += ingredient;
     });
 
-    var macros;
-    return macros;
+    return new nutrit.Macros(10, 20, 30);
 };
