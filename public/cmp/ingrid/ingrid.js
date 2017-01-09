@@ -1,6 +1,13 @@
 'use strict';
 //globals: scion, Handlebars, bella
 
+/**
+ *
+ * @param {HTMLElement} container
+ * @param {Food[]} originalIngredients
+ * @param onChange {function}
+ * @constructor
+ */
 function Ingrid(container, originalIngredients, onChange) {
     var ingredients = bella.immutable.deepClone(originalIngredients);
 
@@ -101,7 +108,7 @@ function Ingrid(container, originalIngredients, onChange) {
         var list = document.createElement('ul');
         var templateData = {
             ingredients: ingredients,
-            units: Ingrid.units
+            units: nutrit.Unit
         };
         var template = Handlebars.compile(templateString);
         list.innerHTML = template(templateData);
@@ -124,15 +131,8 @@ function Ingrid(container, originalIngredients, onChange) {
             food: food,
             editing: true,
             amount: null,
-            unit: Ingrid.units.G
+            unit: nutrit.Unit.G
         });
         render();
     };
 }
-
-Ingrid.units = {
-    G: 'g',
-    MG: 'mg',
-    OZ: 'oz',
-    LB: 'lb'
-};
