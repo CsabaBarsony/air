@@ -43,7 +43,7 @@ function Show(container) {
                 `<ul>
                 {{#each macros}}
                 <li>
-                    <span>{{name}}: {{value}}</span>
+                    <span>{{@key}}: {{this}}</span>
                 </li>
                 {{/each}}
             </ul>
@@ -68,14 +68,22 @@ Show.calculateMacros = function(ingredients) {
         return ingredient;
     }
 
-    var sumCh = 0;
+    var sumCh  = 0;
     var sumFat = 0;
-    var sumProtein = 0;
+    var sumP   = 0;
 
     ingredients.forEach((ingredient) => {
         ingredient = convertToGram(ingredient);
-        sumCh += ingredient;
+        sumCh  += ingredient.food.macros.ch  * ingredient.amount;
+        sumFat += ingredient.food.macros.fat * ingredient.amount;
+        sumP   += ingredient.food.macros.p   * ingredient.amount;
     });
 
-    return new nutrit.Macros(10, 20, 30);
+    var sumMacros = sumCh + sumFat + sumP;
+
+    var ch  = (sumCh  / sumMacros * 100);
+    var fat = (sumFat / sumMacros * 100);
+    var p   = (sumP   / sumMacros * 100);
+
+    return new nutrit.Macros(ch, fat, p);
 };

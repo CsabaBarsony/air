@@ -1,6 +1,6 @@
 'use strict';
 
-(function() {
+var nutrit = function() {
     /**
      * @param {string} name
      * @param {Macros} macros
@@ -45,12 +45,13 @@
         this.food = food;
         this.amount = amount;
         this.unit = unit;
+        this.editing = false;
     }
 
-    window.nutrit = {
+    return {
         Food:   Food,
         Macros: Macros,
         Unit: Unit,
         Ingredient: Ingredient
     };
-}(window));
+}();

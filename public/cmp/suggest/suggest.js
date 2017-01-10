@@ -1,7 +1,7 @@
 'use strict';
 //globals: scion, Handlebars
 
-(function() {
+var suggest = function() {
     /**
      * Suggest component
      *
@@ -302,8 +302,8 @@
         DOWN: 'down'
     };
 
-    window.suggest = {
+    return {
         Suggest: Suggest,
         Suggestion: Suggestion
     };
-})(window);
+}();
