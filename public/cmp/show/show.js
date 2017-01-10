@@ -24,29 +24,14 @@ function Show(container) {
             container.innerHTML = '';
         }
         else {
-            var macros = [
-                {
-                    name: 'ch',
-                    value: 10
-                },
-                {
-                    name: 'fat',
-                    value: 20
-                },
-                {
-                    name: 'protein',
-                    value: 30
-                }
-            ];
-
             var templateString =
                 `<ul>
-                {{#each macros}}
-                <li>
-                    <span>{{@key}}: {{this}}</span>
-                </li>
-                {{/each}}
-            </ul>
+                    {{#each macros}}
+                    <li>
+                        <span>{{@key}}: {{this}}</span>
+                    </li>
+                    {{/each}}
+                </ul>
             `;
 
             container.innerHTML = Handlebars.compile(templateString)({ macros: Show.calculateMacros(ingredients) });
