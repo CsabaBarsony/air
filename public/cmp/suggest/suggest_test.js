@@ -1,21 +1,15 @@
 describe('Suggest', function() {
-    it('renderSuggestField()', function() {
-        var suggestField = suggest.Suggest.renderSuggestField();
+    var suggestions = ['first', 'second', 'third'].map((s) => {
+        return new Suggestion(s);
+    });
+    var instance = new Suggest(document.createElement('div'), () => {}, () => {}, suggestions);
 
-        expect(suggestField.tagName.toLowerCase()).toBe('div');
-        expect(suggestField.style.display).toBe('none');
-        expect(suggestField.classList[0]).toBe('suggest_field');
+    it('select suggestion', function() {
+        instance.selectSuggestion(suggest.Direction.DOWN);
+        expect(ins)
     });
 
-    it('renderInput()', function() {
-        var emptyFunction = function() {};
-        var input = suggest.Suggest.renderInput(emptyFunction, emptyFunction, emptyFunction, emptyFunction);
-
-        expect(input.tagName.toLowerCase()).toBe('input');
-        expect(input.classList[0]).toBe('suggest_input');
-    });
-
-    describe('selectSuggestion()', function() {
+    /*describe('selectSuggestion()', function() {
         var suggestions, expected;
 
         beforeEach(function() {
@@ -105,5 +99,5 @@ describe('Suggest', function() {
                 expect(function() { suggest.Suggest.selectSuggestion(suggestions, 'up'); }).toThrow(new Error('more than one suggestion is selected'));
             });
         });
-    });
+    });*/
 });

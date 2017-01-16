@@ -1,14 +1,23 @@
 'use strict';
 
+function foo() {
+    var x = this;
+}
+
+foo.call('majom');
+
+/*
+'use strict';
+
 (function(){
     const events = {
         FOOD_SELECT:        'FOOD_SELECT',
         INGREDIENTS_CHANGE: 'INGREDIENTS_CHANGE'
     };
 
-    /**
+    /!**
      * @type {{avocado: Food, broccoli: Food, carrots: Food, cheese: Food, chicken: Food, chips: Food}}
-     */
+     *!/
     var foods = {
         avocado:  new nutrit.Food('avocado' , new nutrit.Macros(10, 60, 10)),
         broccoli: new nutrit.Food('broccoli', new nutrit.Macros(40, 5,  10)),
@@ -19,12 +28,12 @@
     };
 
     var server = {
-        /**
+        /!**
          * @param {string} text
          * @param {function(Suggestion[])} callback
-         */
+         *!/
         getSuggestions: function(text, callback) {
-            /* @type {Suggestion[]} */
+            /!* @type {Suggestion[]} *!/
             var results = [];
             Object.keys(foods).forEach(key => {
                 if(new RegExp('^' + text, 'gi').test(foods[key].name)) results.push(new suggest.Suggestion(foods[key].name, foods[key]));
@@ -33,9 +42,9 @@
                 callback(results);
             }, 300);
         },
-        /**
+        /!**
          * @param {Suggestion} suggestion
-         */
+         *!/
         getSelectedSuggestion: function(suggestion) {
             PubSub.publish(events.FOOD_SELECT, suggestion.data);
         }
@@ -65,3 +74,4 @@
 
     new suggest.Suggest(document.getElementById('suggest_container'), server.getSuggestions, server.getSelectedSuggestion);
 })();
+*/

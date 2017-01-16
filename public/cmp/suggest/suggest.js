@@ -1,4 +1,4 @@
-'use strict';
+
 //globals: scion, Handlebars
 
 var suggest = function() {
@@ -8,10 +8,12 @@ var suggest = function() {
      * @param {HTMLElement} container
      * @param {function(string, function)} onType
      * @param {function(Food)} onSelect
+     * @param {Suggestion[]} [suggestions]
      * @constructor
      */
-    function Suggest(container, onType, onSelect) {
-        var suggestions = [];
+    function Suggest(container, onType, onSelect, suggestions) {
+        this.suggestions = [];
+        this.container = container;
         var pendingLoadings = 0;
         var actions = {
             visible: {
@@ -38,15 +40,15 @@ var suggest = function() {
                 }
             },
             suggesting: {
-                entry: function(e) {
-                    suggestions = e.data;
-                    render();
+                entry: (e) => {
+                    this.suggestions = e.data;
+                    this.render();
                 }
             },
             excited: {
-                entry: function(e) {
-                    suggestions = Suggest.selectSuggestion(suggestions, e.data);
-                    render();
+                entry: (e) => {
+                    this.selectSuggestion(e.data);
+                    this.render();
                 }
             },
             blur: {
@@ -175,13 +177,13 @@ var suggest = function() {
             }
         ];
 
-        var sc = new scion.Statechart({ states: states }, { logStatesEnteredAndExited: false });
+        var sc = new scion.Statechart({ states: states }, { logStatesEnteredAndExited: true });
         sc.start();
 
         var suggestContainer = document.createElement('div');
-        suggestContainer.addEventListener('keydown', function(e) {
-            var selected;
-            suggestions.forEach((s) => {
+        suggestContainer.addEventListener('keydown', (e) => {
+            var selected = false;
+            this.suggestions.forEach((s) => {
                 if(s.selected) selected = s;
             });
             if(e.key === 'Enter') {
@@ -191,7 +193,7 @@ var suggest = function() {
         suggestContainer.className += 'suggest';
         container.appendChild(suggestContainer);
 
-        var input = Suggest.renderInput(function() {
+        var input = renderInput(function() {
             sc.gen('select');
         }, function() {
             sc.gen('unselect');
@@ -213,22 +215,12 @@ var suggest = function() {
 
         suggestContainer.appendChild(input);
 
-        var suggestField = Suggest.renderSuggestField();
+        var suggestField = renderSuggestField();
 
         suggestContainer.appendChild(suggestField);
-
-        function render() {
-            var template = `
-            <ul>
-                {{#each suggestions}}
-                <li{{#if selected}} class="selected"{{/if}}>{{text}}</li>
-                {{/each}}
-            </ul>`;
-            suggestField.innerHTML = Handlebars.compile(template)({ suggestions: suggestions });
-        }
     }
 
-    Suggest.renderInput = function(onFocus, onBlur, onInput, onKeydown) {
+    function renderInput(onFocus, onBlur, onInput, onKeydown) {
         var input = document.createElement('input');
         input.className += 'suggest_input';
         input.onfocus = onFocus;
@@ -236,51 +228,59 @@ var suggest = function() {
         input.addEventListener('input', onInput);
         input.addEventListener('keydown', onKeydown);
         return input;
-    };
+    }
 
-    Suggest.renderSuggestField = function() {
+    function renderSuggestField() {
         var suggestField = document.createElement('div');
         suggestField.className += 'suggest_field';
         suggestField.style.display = 'none';
         return suggestField;
+    }
+
+    Suggest.prototype.render = function() {
+        var suggestField = this.container.querySelector('.suggest_field');
+        var template = `
+            <ul>
+                {{#each suggestions}}
+                <li{{#if selected}} class="selected"{{/if}}>{{text}}</li>
+                {{/each}}
+            </ul>`;
+        suggestField.innerHTML = Handlebars.compile(template)({ suggestions: this.suggestions });
     };
 
     /**
-     * @param {Suggestion[]} suggestions
      * @param {Direction} direction
      * @returns {Suggestion[]}
      */
-    Suggest.selectSuggestion = function(suggestions, direction) {
-        if(!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Suggestions parameter should be an array containing at least one element.');
-        var selected, selectedIndex, first, last, count = 0;
-        suggestions.forEach((s, i) => {
+    Suggest.prototype.selectSuggestion = function(direction) {
+        var selected = false, selectedIndex = null, first, last, count = 0;
+        this.suggestions.forEach((s, i) => {
             if(s.selected) {
                 count++;
                 selected = s;
                 selectedIndex = i;
                 if(i === 0) first = true;
-                else if(i === suggestions.length - 1) last = true;
+                else if(i === this.suggestions.length - 1) last = true;
             }
         });
         if(count > 1) throw new Error('more than one suggestion is selected');
         if(!selected) {
             if(direction === Direction.UP) {
-                suggestions[suggestions.length - 1].selected = true;
+                this.suggestions[this.suggestions.length - 1].selected = true;
             }
             else {
-                suggestions[0].selected = true;
+                this.suggestions[0].selected = true;
             }
         }
         else {
-            selected.selected = false;
+            selected = false;
             if(direction === Direction.UP && !first) {
-                suggestions[selectedIndex - 1].selected = true;
+                this.suggestions[selectedIndex - 1].selected = true;
             }
             else if(direction === Direction.DOWN && !last) {
-                suggestions[selectedIndex + 1].selected = true;
+                this.suggestions[selectedIndex + 1].selected = true;
             }
         }
-        return suggestions;
     };
 
     /**
@@ -304,6 +304,7 @@ var suggest = function() {
 
     return {
         Suggest: Suggest,
-        Suggestion: Suggestion
+        Suggestion: Suggestion,
+        Direction: Direction
     };
 }();
