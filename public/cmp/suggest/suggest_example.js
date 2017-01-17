@@ -1,0 +1,153 @@
+'use strict';
+/* global nutrit, suggest */
+
+(function() {
+    var Suggest = suggest.Suggest;
+    var Macros  = nutrit.Macros;
+    var Food    = nutrit.Food;
+
+    var foodNames = [
+        'asparagus',
+        'apples',
+        'avocado',
+        'alfalfa',
+        'almond',
+        'arugala',
+        'artichoke',
+        'applesauce',
+        'antelope',
+        'albacore tuna',
+        'Apple juice',
+        'Avocado roll',
+        'Bruscetta',
+        'bacon',
+        'black beans',
+        'bagels',
+        'baked beans',
+        'BBQ',
+        'bison',
+        'barley',
+        'beer',
+        'bisque',
+        'bluefish',
+        'bread',
+        'broccoli',
+        'buritto',
+        'babaganoosh',
+        'Cabbage',
+        'cake',
+        'carrots',
+        'carne asada',
+        'celery',
+        'cheese',
+        'chicken',
+        'catfish',
+        'chips',
+        'chocolate',
+        'chowder',
+        'clams',
+        'coffee',
+        'cookies',
+        'corn',
+        'cupcakes',
+        'crab',
+        'curry',
+        'cereal',
+        'chimichanga',
+        'dates',
+        'dips',
+        'duck',
+        'dumplings',
+        'donuts',
+        'eggs',
+        'enchilada',
+        'eggrolls',
+        'English muffins',
+        'edimame',
+        'eel sushi',
+        'fajita',
+        'falafel',
+        'franks',
+        'fondu',
+        'French toast',
+        'French dip',
+        'Garlic',
+        'ginger',
+        'gnocchi',
+        'goose',
+        'granola',
+        'grapes',
+        'green beans',
+        'Guancamole',
+        'gumbo',
+        'grits',
+        'Graham crackers',
+        'ham',
+        'halibut',
+        'honey',
+        'huenos rancheros',
+        'hash browns',
+        'hot dogs',
+        'haiku roll',
+        'hummus',
+        'ice cream',
+        'Irish stew',
+        'Indian food',
+        'Italian bread',
+        'jambalaya',
+        'jelly / jam',
+        'jerky',
+        'jalapeño',
+        'kale',
+        'kabobs',
+        'ketchup',
+        'kiwi',
+        'kidney beans',
+        'kingfish',
+        'lobster',
+        'Lamb',
+        'Linguine',
+        'Lasagna',
+        'Meatballs',
+        'Moose',
+        'Milk',
+        'Milkshake',
+        'Noodles',
+        'Ostrich',
+        'Pizza',
+        'Pepperoni',
+        'Porter',
+        'Pancakes',
+        'Quesadilla',
+        'Quiche',
+        'Reuben',
+        'Spinach',
+        'Spaghetti',
+        'Tater tots',
+        'Toast',
+        'Venison',
+        'Waffles',
+        'Wine',
+        'Walnuts',
+        'Yogurt',
+        'Ziti',
+        'Zucchini'
+    ];
+    var macros = new Macros(10, 20, 30);
+
+    function onType(text, callback) {
+        /** @type {Suggestion[]} */ var results = [];
+        foodNames.forEach(foodName => {
+            if(new RegExp('^' + text, 'gi').test(foodName)) results.push(new suggest.Suggestion(foodName, new Food(foodName, macros)));
+        });
+        setTimeout(function() {
+            callback(results);
+        }, 300);
+    }
+
+    function onSelect(suggestion) {
+        document.getElementById('result_display').innerHTML = 'You choosed: ' + suggestion.text;
+    }
+
+    new Suggest(document.getElementById('suggest_container'), onType, onSelect);
+}());

@@ -5,36 +5,15 @@
         <title>Ingrid</title>
     </head>
     <body>
-        <button onClick="addIngredient()">Add Ingredient</button>
+        <button id="add_ingredient">Add Ingredient</button>
         <div id="ingrid_container"></div>
 
         <script src="../../lib/handlebars.js"></script>
         <script src="../../lib/scion.js"></script>
         <script src="../../lib/bella.js"></script>
+        <script src="../../lib/nutrit.js"></script>
+
         <script src="ingrid.js"></script>
-        <script>
-            function onChange() {}
-
-            function addIngredient() {
-                ingrid.add('new food');
-            }
-
-            var ingredients = [
-                {
-                    food: 'avocado',
-                    editing: true,
-                    amount: 200,
-                    unit: Ingrid.units.G
-                },
-                {
-                    food: 'broccoli',
-                    editing: false,
-                    amount: 123,
-                    unit: Ingrid.units.G
-                }
-            ];
-
-            var ingrid = new Ingrid(document.getElementById('ingrid_container'), ingredients, onChange);
-        </script>
+        <script src="ingrid_example.js"></script>
     </body>
 </html>
