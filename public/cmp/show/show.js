@@ -1,5 +1,5 @@
 'use strict';
-//globals: nutrit, Handlebars
+/* global nutrit, Handlebars */
 
 /**
  * Show component

@@ -1,5 +1,5 @@
-
-//globals: scion, Handlebars
+'use strict';
+/* global scion, Handlebars */
 
 var suggest = function() {
     /**
@@ -8,10 +8,9 @@ var suggest = function() {
      * @param {HTMLElement} container
      * @param {function(string, function)} onType
      * @param {function(Food)} onSelect
-     * @param {Suggestion[]} [suggestions]
      * @constructor
      */
-    function Suggest(container, onType, onSelect, suggestions) {
+    function Suggest(container, onType, onSelect) {
         this.suggestions = [];
         this.container = container;
         var pendingLoadings = 0;
@@ -47,7 +46,7 @@ var suggest = function() {
             },
             excited: {
                 entry: (e) => {
-                    this.selectSuggestion(e.data);
+                    this.suggestions = Suggest.selectSuggestion(this.suggestions, e.data);
                     this.render();
                 }
             },
@@ -249,38 +248,40 @@ var suggest = function() {
     };
 
     /**
+     * @param {Suggestion[]} suggestions
      * @param {Direction} direction
      * @returns {Suggestion[]}
      */
-    Suggest.prototype.selectSuggestion = function(direction) {
-        var selected = false, selectedIndex = null, first, last, count = 0;
-        this.suggestions.forEach((s, i) => {
+    Suggest.selectSuggestion = function(suggestions, direction) {
+        var selected = null, selectedIndex = null, first, last, count = 0;
+        suggestions.forEach((s, i) => {
             if(s.selected) {
                 count++;
                 selected = s;
                 selectedIndex = i;
                 if(i === 0) first = true;
-                else if(i === this.suggestions.length - 1) last = true;
+                else if(i === suggestions.length - 1) last = true;
             }
         });
         if(count > 1) throw new Error('more than one suggestion is selected');
         if(!selected) {
-            if(direction === Direction.UP) {
-                this.suggestions[this.suggestions.length - 1].selected = true;
+            if(direction === 'up') {
+                suggestions[suggestions.length - 1].selected = true;
             }
             else {
-                this.suggestions[0].selected = true;
+                suggestions[0].selected = true;
             }
         }
         else {
-            selected = false;
-            if(direction === Direction.UP && !first) {
-                this.suggestions[selectedIndex - 1].selected = true;
+            selected.selected = false;
+            if(direction === 'up' && !first) {
+                suggestions[selectedIndex - 1].selected = true;
             }
-            else if(direction === Direction.DOWN && !last) {
-                this.suggestions[selectedIndex + 1].selected = true;
+            else if(direction === 'down' && !last) {
+                suggestions[selectedIndex + 1].selected = true;
             }
         }
+        return suggestions;
     };
 
     /**

@@ -1,5 +1,5 @@
 'use strict';
-//globals: nutrit, scion, Handlebars
+/* global nutrit, scion, Handlebars */
 
 /**
  * Ingrid component
@@ -40,7 +40,7 @@ function Ingrid(container, ingredients, onChange) {
     var sc = new scion.Statechart(chart, { logStatesEnteredAndExited: false });
     sc.start();
 
-    function onListingEntry(action) {
+    function onListingEntry() {
         render();
     }
 
